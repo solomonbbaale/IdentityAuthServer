@@ -1,0 +1,31 @@
+﻿FROM mcr.microsoft.com/dotnet/core/sdk:3.1 As Builder
+
+WORKDIR ./app
+
+Copy *.csproj .
+
+RUN dotnet clean
+
+RUN dotnet restore
+
+Copy . .
+
+RUN dotnet build
+
+RUN dotnet publish -c Release -o out
+
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 As Final
+
+WORKDIR ./app/out
+
+ENV ASPNETCORE_URLS http://+:5000
+
+EXPOSE 5000
+
+Copy --from=Builder ./app/out .
+
+EntryPoint  ["dotnet", "IdentityAuthServer.dll"]
+
+
+
+
